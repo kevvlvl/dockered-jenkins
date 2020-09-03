@@ -1,11 +1,14 @@
 def _nginxImg
 def _nginxFileExists
+def _dockerFileDir
 
 pipeline {
 
     agent any
+    
     options {
         timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
     
     parameters {
@@ -14,6 +17,15 @@ pipeline {
     }
     
     stages {
+    
+        stage('Cleanup dir') {
+            steps {
+                script {
+                    deleteDir()
+                }
+            }
+        }
+    
         stage('Git clone') {
             steps {
                 git "${params.GIT_REPO}"
@@ -23,19 +35,27 @@ pipeline {
         stage('LS Git repo') {
             steps{
                 script {
-                    sh "ls -lah"
+                    sh "pwd; ls -lah"
                     _nginxFileExists = fileExists "./${params.NGINX_DOCKERFILE}"
                     echo "NGINX file exists? $_nginxFileExists"
+                    _dockerFileDir = sh (
+                        script: 'pwd',
+                        returnStdout: true
+                    ).trim()
                 }
             }
         }
         
         stage('Build NGINX docker container') {
             when { expression { _nginxFileExists == true } }
-            steps{
-                script {
-                    _nginxImg = docker.build('nginx:0.0.1', "-f ${params.NGINX_DOCKERFILE} .")
+            agent {
+                dockerfile {
+                    filename "${params.NGINX_DOCKERFILE}"
+                    dir "$_dockerFileDir"
                 }
+            }
+            steps {
+                echo 'Built container'
             }
         }
     }

@@ -1,5 +1,8 @@
 # Setup Jenkins
 
+The following project deploys a containerized Jenkins which uses the host Docker engine to build and deploy containers external to the Jenkins container.
+The idea being that you can containerize Jenkins and implement orchestration with external SCM sources and systems, and deploy containers and/or artifacts outside of Jenkins.
+
 ### create a persistent volume
 
 docker volume create jenkins-vol
@@ -23,4 +26,4 @@ launch jenkins on http://localhost:8080 and complete initial setup of Jenkins
 
 ### create a sample pipeline to build and deployer an nginx container
 
-    
+See build-dockerimage.Jenkinsfile as the example.
