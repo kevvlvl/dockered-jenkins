@@ -6,6 +6,18 @@ The idea being that you can containerize Jenkins and implement orchestration wit
 ### create a persistent volume
 
 docker volume create jenkins-vol
+docker volume create nexus-vol
+
+### build Nexus
+
+docker image build -f nexus-Dockerfile -t nexus:0.0.1 .
+
+### run Nexus
+
+docker container run -d --name nexus \
+                 -p 8081:8081 \
+                 -v nexus-vol:/nexus-data
+                 nexus:0.0.1
 
 ### build Jenkins
 
@@ -16,7 +28,7 @@ docker image build -f jenkins-Dockerfile -t jenkins:0.0.1 .
 $ docker container run -d --name jenkins \
                    -p 8080:8080 \
                    -p 50000:50000 \
-                   --mount source=jenkins-vol,target=/var/jenkins_home \
+                   -v jenkins-vol:/var/jenkins_home \
                    -v /var/run/docker.sock:/var/run/docker.sock \
                    jenkins:0.0.1
 

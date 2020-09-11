@@ -1,0 +1,6 @@
+FROM sonatype/nexus3
+
+LABEL maintainer="kevvlvl" \
+      description="Containerized Artifact repository" 
+      
+EXPOSE 8081
