@@ -10,18 +10,23 @@ docker volume create nexus-vol
 
 ### build Nexus
 
-docker image build -f nexus-Dockerfile -t nexus:0.0.1 .
+$ docker image build -f nexus-Dockerfile -t nexus:0.0.1 .
 
 ### run Nexus
 
-docker container run -d --name nexus \
+$ docker container run -d --name nexus \
                  -p 8081:8081 \
-                 -v nexus-vol:/nexus-data
+                 -p 8083:8083 \
+                 -v nexus-vol:/nexus-data \
                  nexus:0.0.1
+                 
+Launch nexus on http://localhost:8081. Click sign-in and follow procedure to recuperate password form the container's file system. Then, I changed the password for the sake of this exercise (but please keep it complex and securely stored!). Following the password change, create a Docker hosted private repository exposed on HTTP port 8083 (notice how we're exposing 8083 in the above docker container run statement).
+
+    using admin account admin:admin123
 
 ### build Jenkins
 
-docker image build -f jenkins-Dockerfile -t jenkins:0.0.1 .
+$ docker image build -f jenkins-Dockerfile -t jenkins:0.0.1 .
 
 ### run jenkins mounted to the volume to a detached container
 

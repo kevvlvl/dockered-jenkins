@@ -2,6 +2,9 @@ def _nginxFileExists
 def _dockerFileDir
 def _NGINX_IMAGE = 'nginx:0.0.1'
 def _NGINX_CONTAINER = 'nginx'
+def _NEXUS_ADDRESS = 'localhost:8083'
+def _NEXUS_REPO = 'docker-onprem'
+def _NEXUS_IMAGE_TAG = 'localhost:8083/repository/docker-onprem/nginx:0.0.1'
 
 pipeline {
 
@@ -54,6 +57,7 @@ pipeline {
                 echo "Build the nginx docker container"
                 script {
                     sh "docker image build -f ${params.NGINX_DOCKERFILE} -t ${_NGINX_IMAGE} ${_dockerFileDir}"
+                    sh "docker tag ${_NGINX_IMAGE} ${_NEXUS_IMAGE_TAG}"
                 }
             }
             
@@ -65,6 +69,29 @@ pipeline {
                     echo "Delete docker image"
                     script {
                         sh "docker image rm ${_NGINX_IMAGE}"
+                    }
+                }
+            }   
+        }
+        
+        stage('Push NGINX image to Nexus') {
+            steps {
+                echo "Push image to Nexus image registry"
+                script {
+                    sh "docker login -u admin -p admin123 ${_NEXUS_ADDRESS}"
+                    sh "docker push ${_NEXUS_IMAGE_TAG}"
+                    sh "docker logout ${_NEXUS_ADDRESS}"
+                }
+            }
+            
+            post {
+                success {
+                    echo "Image pushed to Nexus"
+                }
+                failure {
+                    echo "FAILURE to push. Logout from Nexus"
+                    script {
+                        sh "docker logout ${_NEXUS_ADDRESS}"
                     }
                 }
             }   
